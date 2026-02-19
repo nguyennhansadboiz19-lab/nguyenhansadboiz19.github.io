@@ -2,173 +2,167 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<title>FC Online Upgrade Calculator PRO</title>
+<title>FC Online Upgrade</title>
 
 <style>
 body{
-    margin:0;
-    font-family:Arial, sans-serif;
-    background:linear-gradient(135deg,#020617,#0f172a);
-    color:white;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    min-height:100vh;
+  margin:0;
+  font-family:Arial, sans-serif;
+  background: radial-gradient(circle at top,#0a0f1c,#0f2027,#1f3b4d);
+  color:white;
+  text-align:center;
+}
+
+/* CARD */
+.card-box{
+  width:320px;
+  margin:60px auto;
 }
 
 .card{
-    background:#0f172a;
-    border:1px solid #334155;
-    padding:30px;
-    border-radius:16px;
-    width:360px;
-    box-shadow:0 0 30px rgba(0,0,0,0.6);
+  height:180px;
+  border-radius:12px;
+  background:linear-gradient(135deg,#1e293b,#0f172a);
+  border:2px solid #22c55e;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  box-shadow:0 0 20px rgba(0,0,0,0.6);
+  position:relative;
+  overflow:hidden;
 }
 
-h1{
-    text-align:center;
-    margin-bottom:20px;
-    font-size:22px;
+.season{
+  font-size:14px;
+  opacity:0.8;
 }
 
-label{
-    display:block;
-    margin-top:12px;
-    font-size:14px;
+.ovr{
+  font-size:42px;
+  font-weight:bold;
 }
 
-input,select,button{
-    width:100%;
-    padding:10px;
-    margin-top:6px;
-    border-radius:8px;
-    border:none;
-    font-size:15px;
+.level{
+  font-size:24px;
+  margin-top:5px;
 }
 
-input,select{
-    background:#1e293b;
-    color:white;
-}
-
+/* BUTTON */
 button{
-    background:#22c55e;
-    font-weight:bold;
-    margin-top:15px;
-    cursor:pointer;
+  width:320px;
+  padding:12px;
+  margin-top:12px;
+  border:none;
+  border-radius:8px;
+  font-size:16px;
+  cursor:pointer;
 }
 
-button:hover{
-    background:#16a34a;
+.up{ background:#22c55e; color:white; }
+.reset{ background:#ef4444; color:white; }
+
+/* EFFECT */
+.flash{
+  position:absolute;
+  width:100%;
+  height:100%;
+  background:rgba(255,255,255,0.2);
+  opacity:0;
+  transition:0.4s;
 }
 
+.show{ opacity:1; }
+
+/* TEXT */
 .result{
-    margin-top:15px;
-    text-align:center;
-    font-size:18px;
-    font-weight:bold;
+  margin-top:15px;
+  font-size:18px;
+  min-height:24px;
 }
 
-.bar{
-    width:100%;
-    height:20px;
-    background:#1e293b;
-    border-radius:10px;
-    overflow:hidden;
-    margin-top:10px;
-}
-
-.fill{
-    height:100%;
-    width:0%;
-    transition:0.4s;
-}
-
-.history{
-    margin-top:20px;
-    font-size:13px;
-    max-height:150px;
-    overflow:auto;
-    border-top:1px solid #334155;
-    padding-top:10px;
-}
-
-.history div{
-    margin-top:4px;
-    opacity:0.9;
+select{
+  width:320px;
+  padding:10px;
+  border-radius:8px;
+  border:none;
+  margin-top:12px;
 }
 </style>
 </head>
 
 <body>
 
+<div class="card-box">
+
+<select id="season">
+<option>WS</option>
+<option>FAC</option>
+<option>26TOTY</option>
+<option>25TOTY</option>
+<option>ICON TM</option>
+<option>HERO</option>
+</select>
+
 <div class="card">
-    <h1>? Upgrade Calculator PRO</h1>
+  <div class="flash" id="flash"></div>
+  <div class="season" id="seasonText">WS</div>
+  <div class="ovr" id="ovr">101</div>
+  <div class="level" id="level">+1</div>
+</div>
 
-    <label>C?p th? mu?n l n:</label>
-    <select id="level">
-        <option>+1 ? +2</option>
-        <option>+2 ? +3</option>
-        <option>+3 ? +4</option>
-        <option>+4 ? +5</option>
-        <option>+5 ? +6</option>
-        <option>+6 ? +7</option>
-        <option>+7 ? +8</option>
-        <option>+8 ? +9</option>
-        <option>+9 ? +10</option>
-    </select>
+<button class="up" onclick="upgrade()">NÂNG CẤP</button>
+<button class="reset" onclick="newCard()">THẺ MỚI</button>
 
-    <label>S? l?n d?p:</label>
-    <input type="number" id="attempts">
+<div class="result" id="result"></div>
 
-    <label>S? l?n th nh c ng:</label>
-    <input type="number" id="success">
-
-    <button onclick="calculate()">T NH NGAY</button>
-
-    <div class="result" id="result"></div>
-
-    <div class="bar">
-        <div class="fill" id="fill"></div>
-    </div>
-
-    <div class="history" id="history"></div>
 </div>
 
 <script>
-function calculate(){
-    let attempts = Number(document.getElementById("attempts").value);
-    let success = Number(document.getElementById("success").value);
-    let level = document.getElementById("level").value;
+let level = 1;
+let baseOVR = 100;
+const RATE = 0.88;
 
-    if(attempts<=0 || success<0 || success>attempts){
-        result.innerText="? D? li?u kh ng h?p l?";
-        return;
-    }
+document.getElementById("season").onchange = ()=>{
+  document.getElementById("seasonText").innerText =
+    document.getElementById("season").value;
+};
 
-    let rate = success/attempts*100;
-    let predict = rate.toFixed(2);
-
-    result.innerText = "T? l? th nh c ng: " + rate.toFixed(2) + "%";
-
-    let fill = document.getElementById("fill");
-    fill.style.width = rate + "%";
-
-    if(rate>=50){
-        fill.style.background="#22c55e";
+function upgrade(){
+  flash();
+  setTimeout(()=>{
+    if(Math.random() < RATE){
+      level++;
+      baseOVR++;
+      show("✨ Thành công lên +" + level);
     }else{
-        fill.style.background="#ef4444";
+      if(level>1) level--;
+      show("💥 Xịt! Tụt xuống +" + level);
     }
-
-    saveHistory(level,attempts,success,rate);
+    update();
+  },500);
 }
 
-function saveHistory(level,a,s,r){
-    let history = document.getElementById("history");
-    let item = document.createElement("div");
-    item.innerText =
-        level+" | "+s+"/"+a+" ? "+r.toFixed(1)+"%";
-    history.prepend(item);
+function newCard(){
+  level = 1;
+  baseOVR = 100 + Math.floor(Math.random()*5);
+  show("🎴 Nhận thẻ mới");
+  update();
+}
+
+function update(){
+  document.getElementById("level").innerText = "+" + level;
+  document.getElementById("ovr").innerText = baseOVR + level;
+}
+
+function show(text){
+  document.getElementById("result").innerText = text;
+}
+
+function flash(){
+  let f = document.getElementById("flash");
+  f.classList.add("show");
+  setTimeout(()=>f.classList.remove("show"),300);
 }
 </script>
 
