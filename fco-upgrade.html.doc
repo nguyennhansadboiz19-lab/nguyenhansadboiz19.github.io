@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>FC Online Upgrade Calculator PRO</title>
+
+<style>
+body{
+    margin:0;
+    font-family:Arial, sans-serif;
+    background:linear-gradient(135deg,#020617,#0f172a);
+    color:white;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:100vh;
+}
+
+.card{
+    background:#0f172a;
+    border:1px solid #334155;
+    padding:30px;
+    border-radius:16px;
+    width:360px;
+    box-shadow:0 0 30px rgba(0,0,0,0.6);
+}
+
+h1{
+    text-align:center;
+    margin-bottom:20px;
+    font-size:22px;
+}
+
+label{
+    display:block;
+    margin-top:12px;
+    font-size:14px;
+}
+
+input,select,button{
+    width:100%;
+    padding:10px;
+    margin-top:6px;
+    border-radius:8px;
+    border:none;
+    font-size:15px;
+}
+
+input,select{
+    background:#1e293b;
+    color:white;
+}
+
+button{
+    background:#22c55e;
+    font-weight:bold;
+    margin-top:15px;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#16a34a;
+}
+
+.result{
+    margin-top:15px;
+    text-align:center;
+    font-size:18px;
+    font-weight:bold;
+}
+
+.bar{
+    width:100%;
+    height:20px;
+    background:#1e293b;
+    border-radius:10px;
+    overflow:hidden;
+    margin-top:10px;
+}
+
+.fill{
+    height:100%;
+    width:0%;
+    transition:0.4s;
+}
+
+.history{
+    margin-top:20px;
+    font-size:13px;
+    max-height:150px;
+    overflow:auto;
+    border-top:1px solid #334155;
+    padding-top:10px;
+}
+
+.history div{
+    margin-top:4px;
+    opacity:0.9;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+    <h1>? Upgrade Calculator PRO</h1>
+
+    <label>C?p th? mu?n l n:</label>
+    <select id="level">
+        <option>+1 ? +2</option>
+        <option>+2 ? +3</option>
+        <option>+3 ? +4</option>
+        <option>+4 ? +5</option>
+        <option>+5 ? +6</option>
+        <option>+6 ? +7</option>
+        <option>+7 ? +8</option>
+        <option>+8 ? +9</option>
+        <option>+9 ? +10</option>
+    </select>
+
+    <label>S? l?n d?p:</label>
+    <input type="number" id="attempts">
+
+    <label>S? l?n th nh c ng:</label>
+    <input type="number" id="success">
+
+    <button onclick="calculate()">T NH NGAY</button>
+
+    <div class="result" id="result"></div>
+
+    <div class="bar">
+        <div class="fill" id="fill"></div>
+    </div>
+
+    <div class="history" id="history"></div>
+</div>
+
+<script>
+function calculate(){
+    let attempts = Number(document.getElementById("attempts").value);
+    let success = Number(document.getElementById("success").value);
+    let level = document.getElementById("level").value;
+
+    if(attempts<=0 || success<0 || success>attempts){
+        result.innerText="? D? li?u kh ng h?p l?";
+        return;
+    }
+
+    let rate = success/attempts*100;
+    let predict = rate.toFixed(2);
+
+    result.innerText = "T? l? th nh c ng: " + rate.toFixed(2) + "%";
+
+    let fill = document.getElementById("fill");
+    fill.style.width = rate + "%";
+
+    if(rate>=50){
+        fill.style.background="#22c55e";
+    }else{
+        fill.style.background="#ef4444";
+    }
+
+    saveHistory(level,attempts,success,rate);
+}
+
+function saveHistory(level,a,s,r){
+    let history = document.getElementById("history");
+    let item = document.createElement("div");
+    item.innerText =
+        level+" | "+s+"/"+a+" ? "+r.toFixed(1)+"%";
+    history.prepend(item);
+}
+</script>
+
+</body>
+</html>
